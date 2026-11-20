@@ -1,0 +1,129 @@
+{% extends 'portal/base.html' %}
+{% load l10n %}
+{% block judul %}Dashboard · Prediksi Nilai Mahasiswa{% endblock %}
+{% block isi %}
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-teks">
+    <span class="pil reveal"><i class="dot"></i>PROYEK SISTEM CERDAS · MACHINE LEARNING</span>
+    <h1 class="reveal"><span class="grad">Prediksi Performa Akademik Mahasiswa</span></h1>
+    <p class="lead reveal">Website untuk memperkirakan nilai ujian berdasarkan kebiasaan belajar menggunakan algoritma regresi linear. Masukkan data, lihat hasil estimasi, dan pelajari cara kerja model.</p>
+    <div class="hero-aksi reveal">
+      <a class="btn btn-besar" href="{% url 'portal:prediksi' %}"><span>Mulai Prediksi</span><svg class="ic"><use href="#i-arrow"/></svg></a>
+      <a class="btn btn-ghost btn-besar" href="#status"><span>Lihat status model</span></a>
+    </div>
+    <ul class="hero-poin reveal">
+      <li><svg class="ic"><use href="#i-check"/></svg>4 faktor belajar</li>
+      <li><svg class="ic"><use href="#i-check"/></svg>Grafik interaktif</li>
+      <li><svg class="ic"><use href="#i-check"/></svg>Penjelasan AI</li>
+    </ul>
+  </div>
+
+  <div class="hero-visual reveal">
+    <div class="tilt" data-tilt>
+      <div class="hero-kartu" data-anim>
+        <div class="hk-atas"><span class="label">KINERJA MODEL</span><span class="live"><i class="dot"></i>Aktif</span></div>
+        <div class="ring ring-besar" style="--v:{% if metrik %}{% widthratio metrik.r2 1 100 %}{% else %}0{% endif %}">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <defs><linearGradient id="gr-hero" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b5ef4"/><stop offset="1" stop-color="#ff5c8a"/></linearGradient></defs>
+            <circle class="ring-bg" cx="60" cy="60" r="54"/>
+            <circle class="ring-fg" cx="60" cy="60" r="54" stroke="url(#gr-hero)"/>
+          </svg>
+          <div class="ring-isi">
+            <small>R²</small>
+            <strong>{% if metrik %}<span data-count="{{ metrik.r2|unlocalize }}" data-dec="3">{{ metrik.r2 }}</span>{% else %}—{% endif %}</strong>
+            <em>variasi terjelaskan</em>
+          </div>
+        </div>
+        <div class="hk-baris">
+          <div><span>MAE</span><b>{% if metrik %}±{{ metrik.mae }}{% else %}—{% endif %}</b></div>
+          <div><span>Data</span><b>{% if metrik %}{{ metrik.n_data }}{% else %}—{% endif %}</b></div>
+        </div>
+      </div>
+      <span class="melayang m1"><svg class="ic"><use href="#i-trend"/></svg>Regresi Linear</span>
+      <span class="melayang m2"><svg class="ic"><use href="#i-spark"/></svg>Groq AI</span>
+      <span class="melayang m3"><svg class="ic"><use href="#i-target"/></svg>Skor 0–100</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ KARTU RINGKAS ============ -->
+<section class="kartu-grid stagger">
+  <article class="card kartu reveal">
+    <span class="ikon i-indigo"><svg class="ic"><use href="#i-trend"/></svg></span>
+    <span class="label">ALGORITMA</span><h2>Regresi Linear</h2>
+    <p>Model supervised learning untuk memperkirakan nilai ujian dalam bentuk angka.</p>
+  </article>
+  <article class="card kartu reveal">
+    <span class="ikon i-teal"><svg class="ic"><use href="#i-db"/></svg></span>
+    <span class="label">DATASET</span><h2>Student Performance Factors</h2>
+    <p>Dataset berisi faktor kebiasaan belajar dan nilai ujian mahasiswa.</p>
+  </article>
+  <article class="card kartu reveal">
+    <span class="ikon i-pink"><svg class="ic"><use href="#i-spark"/></svg></span>
+    <span class="label">ASISTEN</span><h2>Groq AI</h2>
+    <p>Membantu menjelaskan hasil prediksi, metrik evaluasi, koefisien, dan grafik.</p>
+  </article>
+</section>
+
+<!-- ============ STATUS MODEL ============ -->
+<section class="bagian" id="status">
+  <div class="bagian-kepala reveal">
+    <span class="label">KESEHATAN MODEL</span>
+    <h2>Status model</h2>
+  </div>
+  {% if model_siap and metrik %}
+  <div class="card panel reveal" data-anim>
+    <p class="status-baris"><span class="status-pil"><i class="dot"></i><strong class="status-siap">Model siap digunakan.</strong></span> Model telah dilatih menggunakan <b>{{ metrik.n_data }}</b> baris data.</p>
+    <div class="ringkasan-metrik">
+      <div class="stat"><span class="label">MAE</span><h3><span data-count="{{ metrik.mae|unlocalize }}" data-dec="2">{{ metrik.mae }}</span></h3><p class="catatan">Rata-rata galat absolut</p></div>
+      <div class="stat"><span class="label">R²</span><h3><span data-count="{{ metrik.r2|unlocalize }}" data-dec="3">{{ metrik.r2 }}</span></h3><p class="catatan">Proporsi variasi yang dijelaskan model</p></div>
+      <div class="stat"><span class="label">DATA UJI</span><h3><span data-count="{{ metrik.n_uji|unlocalize }}" data-dec="0">{{ metrik.n_uji }}</span></h3><p class="catatan">Data untuk evaluasi</p></div>
+      <div class="stat"><span class="label">DATA LATIH</span><h3><span data-count="{{ metrik.n_latih|unlocalize }}" data-dec="0">{{ metrik.n_latih }}</span></h3><p class="catatan">Data untuk melatih model</p></div>
+    </div>
+    <div class="pemisah"></div>
+    <h3 class="sub">Seberapa kuat tiap faktor memengaruhi nilai?</h3>
+    <div class="koef-daftar">
+      {% for nama, v in metrik.koefisien.items %}
+      <div class="koef" data-koef="{{ v|unlocalize }}">
+        <div class="koef-atas">
+          <span class="koef-nama">{% if nama == 'Hours_Studied' %}Jam belajar / minggu{% elif nama == 'Attendance' %}Kehadiran kuliah{% elif nama == 'Previous_Scores' %}Nilai sebelumnya{% elif nama == 'Tutoring_Sessions' %}Sesi bimbingan{% else %}{{ nama }}{% endif %}</span>
+          <span class="koef-nilai">+{{ v }} <small>poin / satuan</small></span>
+        </div>
+        <div class="koef-trek"><i class="koef-isi"></i></div>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="catatan">Koefisien menunjukkan perubahan rata-rata nilai tiap penambahan satu satuan faktor, dengan faktor lain dianggap tetap.</p>
+  </div>
+  {% else %}
+  <div class="card panel reveal"><p class="galat">Model belum tersedia. Jalankan <code>python -m portal.ml.latih_model</code> di terminal proyek.</p></div>
+  {% endif %}
+</section>
+
+<!-- ============ ALUR ============ -->
+<section class="bagian">
+  <div class="bagian-kepala reveal">
+    <span class="label">CARA KERJA</span>
+    <h2>Alur penggunaan</h2>
+  </div>
+  <ol class="alur stagger" data-anim>
+    <li class="card langkah reveal"><span class="no">1</span><p>Masukkan empat variabel kebiasaan belajar.</p></li>
+    <li class="card langkah reveal"><span class="no">2</span><p>Sistem memproses input menggunakan model regresi linear.</p></li>
+    <li class="card langkah reveal"><span class="no">3</span><p>Website menampilkan estimasi nilai dan predikat.</p></li>
+    <li class="card langkah reveal"><span class="no">4</span><p>Pelajari grafik dan minta penjelasan tambahan dari AI Groq.</p></li>
+  </ol>
+  <p class="catatan catatan-kotak reveal"><svg class="ic"><use href="#i-info"/></svg><span>Catatan: hasil merupakan estimasi berdasarkan pola pada dataset, bukan jaminan nilai ujian sebenarnya dan bukan hubungan sebab-akibat.</span></p>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="cta reveal">
+  <div>
+    <h2>Siap melihat estimasi nilaimu?</h2>
+    <p>Geser slider, tekan prediksi, dan lihat hasilnya hidup di layar.</p>
+  </div>
+  <a class="btn btn-putih btn-besar" href="{% url 'portal:prediksi' %}"><span>Mulai Prediksi</span><svg class="ic"><use href="#i-arrow"/></svg></a>
+</section>
+
+{% endblock %}

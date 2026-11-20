@@ -1,0 +1,14 @@
+<section class="card panel metode ai-kartu reveal" id="ai-kotak">
+  <h2><span class="ikon-kecil ikon-ai"><svg class="ic"><use href="#i-spark"/></svg></span>Penjelasan AI <small>didukung Groq</small></h2>
+  {% if ai_aktif %}
+    <p class="catatan">AI akan menjelaskan hasil prediksi, faktor model, metrik evaluasi, dan diagram di atas. Jawaban AI dapat keliru; gunakan sebagai bantuan belajar, bukan pengganti analisis model.</p>
+    <form id="ai-form" data-url="{% url 'portal:ai_jelaskan' %}">
+      {% csrf_token %}
+      {% for k, v in ai_params.items %}<input type="hidden" name="{{ k }}" value="{{ v|stringformat:'s' }}">{% endfor %}
+      <button type="submit" id="ai-tombol" class="btn btn-ai"><svg class="ic"><use href="#i-spark"/></svg><span>Jelaskan hasil ini dengan AI</span></button>
+    </form>
+    <div id="ai-hasil" class="ai-hasil" aria-live="polite"></div>
+  {% else %}
+    <p class="catatan">Fitur AI belum aktif. Pastikan file <code>.env</code> berada satu folder dengan <code>manage.py</code> dan berisi <code>GROQ_API_KEY=...</code>. Setelah itu, hentikan server dengan Ctrl+C lalu jalankan kembali <code>python manage.py runserver</code>.</p>
+  {% endif %}
+</section>

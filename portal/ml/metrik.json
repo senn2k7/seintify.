@@ -1,0 +1,32 @@
+{
+  "n_data": 6606,
+  "n_latih": 5284,
+  "n_uji": 1322,
+  "mae": 1.25,
+  "r2": 0.681,
+  "intercept": 41.29,
+  "koefisien": {
+    "Hours_Studied": 0.289,
+    "Attendance": 0.198,
+    "Previous_Scores": 0.049,
+    "Tutoring_Sessions": 0.489
+  },
+  "rentang": {
+    "Hours_Studied": [
+      1.0,
+      44.0
+    ],
+    "Attendance": [
+      60.0,
+      100.0
+    ],
+    "Previous_Scores": [
+      50.0,
+      100.0
+    ],
+    "Tutoring_Sessions": [
+      0.0,
+      8.0
+    ]
+  }
+}

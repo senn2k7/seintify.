@@ -1,0 +1,60 @@
+{% load static %}<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Aplikasi prediksi nilai ujian mahasiswa menggunakan Machine Learning.">
+  <meta name="theme-color" content="#f6f7fd">
+  <title>{% block judul %}Prediksi Nilai Mahasiswa{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'portal/style.css' %}">
+  <script>document.documentElement.classList.add('js');</script>
+  <script src="{% static 'portal/app.js' %}" defer></script>
+</head>
+<body>
+  <!-- Ikon (sprite SVG) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 7c-1.5-1.5-4-2-8-2v13c4 0 6.5.5 8 2 1.5-1.5 4-2 8-2V5c-4 0-6.5.5-8 2z"/><path d="M12 7v13"/></symbol>
+      <symbol id="i-cap" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+      <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-9"/><path d="M15 6h6v6"/></symbol>
+      <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+      <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+      <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    </defs>
+  </svg>
+
+  <div id="progress" aria-hidden="true"></div>
+  <div class="bg" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><div class="dots"></div></div>
+
+  <header class="atas">
+    <div class="wadah bar">
+      <a class="merek" href="{% url 'portal:beranda' %}" aria-label="Prediksi Nilai Mahasiswa">
+        <span class="logo"><svg class="ic"><use href="#i-trend"/></svg></span>
+        <span class="merek-teks">Prediksi Nilai <b>Mahasiswa</b></span>
+      </a>
+      <button class="burger" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="menu"><i></i><i></i><i></i></button>
+      <nav id="menu" class="menu">
+        <a class="nav-link{% if request.resolver_match.url_name == 'beranda' %} aktif{% endif %}" href="{% url 'portal:beranda' %}">Dashboard</a>
+        <a class="nav-link{% if request.resolver_match.url_name == 'prediksi' %} aktif{% endif %}" href="{% url 'portal:prediksi' %}">Prediksi ML</a>
+        <a class="btn btn-kecil nav-cta" href="{% url 'portal:prediksi' %}"><span>Coba sekarang</span><svg class="ic"><use href="#i-arrow"/></svg></a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wadah">{% block isi %}{% endblock %}</main>
+
+  <footer class="wadah kaki">
+    <span>Proyek individu Mata Kuliah Sistem Cerdas · Django &amp; Machine Learning</span>
+    <a href="#" class="ke-atas" aria-label="Kembali ke atas">Ke atas <svg class="ic" style="transform:rotate(-90deg)"><use href="#i-arrow"/></svg></a>
+  </footer>
+</body>
+</html>

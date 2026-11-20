@@ -1,0 +1,139 @@
+{% extends 'portal/base.html' %}
+{% load l10n %}
+{% block judul %}Prediksi ML · Portal Sistem Cerdas{% endblock %}
+{% block isi %}
+<header class="judul-halaman">
+  <span class="pil reveal"><i class="dot"></i>REGRESI LINEAR · ESTIMASI EDUKATIF</span>
+  <h1 class="reveal"><span class="grad">Prediksi Nilai Ujian</span></h1>
+  <p class="lead reveal">Masukkan empat faktor akademik untuk memperkirakan nilai ujian menggunakan model regresi linear. Hasil ini bersifat estimasi edukatif, bukan nilai sebenarnya.</p>
+</header>
+
+{% if model_belum_ada %}
+<section class="card panel ringkas reveal">
+  <p class="galat">Model belum dilatih. Jalankan di terminal:</p>
+  <pre>python -m portal.ml.latih_model</pre>
+  <p class="catatan">Lalu muat ulang halaman ini.</p>
+</section>
+{% else %}
+<div class="dua-kolom">
+
+  <!-- ============ FORM ============ -->
+  <form method="get" class="card panel form-kolom reveal" id="form-prediksi"
+        data-intercept="{{ metrik.intercept|unlocalize }}">
+    <div class="form-kepala">
+      <h2>Data kebiasaan belajar</h2>
+      <div class="preset" role="group" aria-label="Isi cepat">
+        <button type="button" class="chip" data-preset="8,65,60,0">Santai</button>
+        <button type="button" class="chip" data-preset="20,80,75,1">Seimbang</button>
+        <button type="button" class="chip" data-preset="35,98,90,4">Rajin</button>
+      </div>
+    </div>
+
+    {% for f in form %}
+    <div class="field" data-b="{% if f.name == 'Hours_Studied' %}{{ metrik.koefisien.Hours_Studied|unlocalize }}{% elif f.name == 'Attendance' %}{{ metrik.koefisien.Attendance|unlocalize }}{% elif f.name == 'Previous_Scores' %}{{ metrik.koefisien.Previous_Scores|unlocalize }}{% else %}{{ metrik.koefisien.Tutoring_Sessions|unlocalize }}{% endif %}">
+      <div class="field-atas">
+        <label for="{{ f.id_for_label }}">
+          <span class="ikon-kecil"><svg class="ic"><use href="#{% if f.name == 'Hours_Studied' %}i-clock{% elif f.name == 'Attendance' %}i-calendar{% elif f.name == 'Previous_Scores' %}i-book{% else %}i-cap{% endif %}"/></svg></span>
+          {{ f.label }}
+        </label>
+        <span class="num-box">{{ f }}</span>
+      </div>
+      <input type="range" tabindex="-1" aria-hidden="true"
+             min="{{ f.field.min_value|unlocalize }}" max="{{ f.field.max_value|unlocalize }}"
+             value="{% if f.value is not None %}{{ f.value|unlocalize }}{% else %}{{ f.field.initial|unlocalize }}{% endif %}">
+      <div class="rentang"><span>{{ f.field.min_value }}</span><span>{{ f.field.max_value }}</span></div>
+      {% if f.errors %}<span class="galat">{{ f.errors.0 }}</span>{% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="pratinjau" id="pratinjau" aria-live="off">
+      <div class="pratinjau-atas"><span><svg class="ic"><use href="#i-bolt"/></svg>Pratinjau langsung</span><b id="pratinjau-nilai">–</b></div>
+      <div class="pratinjau-trek"><i id="pratinjau-isi"></i></div>
+      <p class="catatan">Hitungan cepat di browser saat kamu menggeser slider. Tekan tombol di bawah untuk hasil resmi dari model.</p>
+    </div>
+
+    <button type="submit" class="btn btn-besar btn-blok" id="btn-prediksi"><span>Prediksi</span><svg class="ic"><use href="#i-arrow"/></svg></button>
+  </form>
+
+  <!-- ============ HASIL ============ -->
+  <div class="kolom-hasil">
+    {% if nilai is not None %}
+    <div class="card panel hasil reveal" id="hasil" data-anim data-grade="{{ predikat }}">
+      <span class="label">Prediksi nilai ujian</span>
+      <div class="ring ring-hasil gauge" data-grade="{{ predikat }}" style="--v:{{ nilai|unlocalize }}" title="Klik untuk memutar ulang animasi">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <defs><linearGradient id="gr-hasil" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b5ef4"/><stop offset="1" stop-color="#ff5c8a"/></linearGradient></defs>
+          <circle class="ring-bg" cx="60" cy="60" r="54"/>
+          <circle class="ring-fg" cx="60" cy="60" r="54" stroke="url(#gr-hasil)"/>
+        </svg>
+        <div class="ring-isi"><div class="angka" data-count="{{ nilai|unlocalize }}" data-dec="1">{{ nilai }}</div><em>dari 100</em></div>
+      </div>
+      <div class="predikat-baris">Predikat <strong class="lencana lencana-{{ predikat|lower }}">{{ predikat }}</strong>
+        <span class="predikat-ket">{% if predikat == 'A' %}Sangat baik{% elif predikat == 'B' %}Baik{% elif predikat == 'C' %}Cukup{% elif predikat == 'D' %}Kurang{% else %}Perlu perbaikan{% endif %}</span>
+      </div>
+      <div class="skala" aria-hidden="true">
+        <div class="skala-bar"><i class="s-e"></i><i class="s-d"></i><i class="s-c"></i><i class="s-b"></i><i class="s-a"></i>
+          <span class="penanda" style="--pos:{{ nilai|unlocalize }}%"></span></div>
+        <div class="skala-label"><span style="left:20%">E</span><span style="left:47.5%">D</span><span style="left:62.5%">C</span><span style="left:77.5%">B</span><span style="left:92.5%">A</span></div>
+      </div>
+      <div class="ringkas-input">
+        {% for f in form %}<span class="chip chip-info">{{ f.label }}: <b>{{ f.value }}</b></span>{% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div class="card panel hasil kosong reveal">
+      <div class="kosong-ilustrasi"><span class="orbit"></span><span class="orbit o2"></span><svg class="ic"><use href="#i-target"/></svg></div>
+      <p>Isi form lalu tekan <strong>Prediksi</strong>.</p>
+      <p class="catatan">Hasil, grafik, dan penjelasan AI akan muncul di sini.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ============ GRAFIK ============ -->
+<section class="card panel metode reveal" data-anim>
+  <h2>Rata-rata nilai ujian per kelompok jam belajar per minggu
+    <small>dari {{ metrik.n_data }} data latih</small></h2>
+  <div class="chart" role="img" aria-label="Diagram batang rata-rata nilai ujian per kelompok jam belajar per minggu">
+    <div class="chart-plot">
+      <div class="ygrid" aria-hidden="true"></div>
+      <div class="batang-wadah">
+        {% for b in grafik %}
+        <div class="batang-kolom" data-val="{{ b.rata|unlocalize }}" data-n="{{ b.n }}">
+          <div class="batang-area">
+            <div class="batang{% if b.aktif %} aktif{% endif %}" style="--h: {{ b.rata|unlocalize }}%">
+              <span class="batang-nilai">{{ b.rata }}</span>
+              {% if b.aktif %}<span class="bendera">Kamu</span>{% endif %}
+            </div>
+            <span class="tip">n = {{ b.n }} data</span>
+          </div>
+          <span class="batang-label">{{ b.label }} jam</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <p class="catatan sumbu-catatan" id="sumbu-catatan"></p>
+  {% if nilai is not None %}<p class="catatan">Batang merah muda = kelompok jam belajar yang kamu masukkan.</p>{% endif %}
+</section>
+
+{% if ai_params %}{% include 'portal/_ai.html' %}{% endif %}
+
+<!-- ============ TENTANG MODEL ============ -->
+<section class="card panel metode reveal">
+  <h2>Tentang model</h2>
+  <p class="rumus">Regresi linear: nilai = <span class="rumus-n">{{ metrik.intercept }}</span>
+    {% for k in koef %}<span class="rumus-op">{{ k.tanda }}</span> <span class="rumus-n">{{ k.abs }}</span> × <span class="rumus-v">{{ k.nama }}</span> {% endfor %}</p>
+  <div class="stat-baris">
+    <div class="stat"><span class="label">Data latih / uji</span><h3>{{ metrik.n_latih }} / {{ metrik.n_uji }}</h3></div>
+    <div class="stat"><span class="label">MAE</span><h3>{{ metrik.mae }} poin</h3></div>
+    <div class="stat"><span class="label">R²</span><h3>{{ metrik.r2 }}</h3></div>
+  </div>
+  <p class="catatan">Dataset: <em>Student Performance Factors</em> (Kaggle),
+  {{ metrik.n_data }} baris setelah dibersihkan. Model hanya mengukur hubungan
+  statistik pada data ini, bukan sebab-akibat, dan hasilnya estimasi. Isian di
+  luar rentang data latih ditolak karena model tidak boleh dipakai untuk
+  memprediksi di luar rentangnya.</p>
+</section>
+{% endif %}
+{% endblock %}
